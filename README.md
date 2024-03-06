@@ -1,2 +1,8 @@
 # PowerPlay-script
-PowerPlay virtual machine scripting language
+"PowerPlay script" is a scripting language made for [PowerPlay virtual machine](https://github.com/PowerPlay-VM/PowerPlay)
+
+###Syntax
+```
+
+
+```
