@@ -1,6 +1,8 @@
+from ast import expr
 from sly import Parser
 from lang_lexer import POWERPLAY_lexer
 from lang_builtin import * 
+from lang_ast import *
 import logging
 
 
@@ -12,25 +14,58 @@ class POWERPLAY_parser(Parser):
 
     tokens = POWERPLAY_lexer.tokens
 
-    @_('expr PLUS term')
-    def expr(self, p):
-        return p.expr + p.term
+    precedence = (
+       ('left', PLUS, MINUS),
+       ('left', TIMES, DIVIDE),
+    )
 
-    @_('expr MINUS term')
+    @_('expr expr')
     def expr(self, p):
-        return p.expr - p.term
+        return Statements_node(p.expr0,p.expr1)
+
+    @_('expr PLUS expr')
+    def expr(self, p):
+        return Add_node(p.expr0,p.expr1)
+
+    @_('expr MINUS expr')
+    def expr(self, p):
+        return Sub_node(p.expr0,p.expr1)
+    
+    @_('expr TIMES expr')
+    def expr(self, p):
+        return Mul_node(p.expr0,p.expr1)
+    
+    @_('expr DIVIDE expr')
+    def expr(self, p):
+        return Div_node(p.expr0,p.expr1)
 
     @_('term')
     def expr(self, p):
         return p.term
-
-    @_('term TIMES factor')
+    
+    @_('expr EQ expr')
     def term(self, p):
-        return p.term * p.factor
+        return Equal_node(p.expr0,p.expr1)
 
-    @_('term DIVIDE factor')
+    @_('expr NE expr')
     def term(self, p):
-        return p.term / p.factor
+        return Not_equal_node(p.expr0,p.expr1)
+    
+    @_('expr LT expr')
+    def term(self, p):
+        return Little_than_node(p.expr0,p.expr1)
+        
+    @_('expr LE expr')
+    def term(self, p):
+        return Little_equal_node(p.expr0,p.expr1)
+    
+    @_('expr GT expr')
+    def term(self, p):
+        return Greater_than_node(p.expr0,p.expr1)
+    
+    @_('expr GE expr')
+    def term(self, p):
+        return Greater_equal_node(p.expr0,p.expr1)
 
     @_('factor')
     def term(self, p):
@@ -38,7 +73,11 @@ class POWERPLAY_parser(Parser):
 
     @_('NUMBER')
     def factor(self, p):
-        return p.NUMBER
+        return Value_node(p.NUMBER)
+    
+    @_('STRING')
+    def factor(self, p):
+        return Value_node(p.STRING)
 
     @_('LPAREN expr RPAREN')
     def factor(self, p):
@@ -46,16 +85,22 @@ class POWERPLAY_parser(Parser):
     
     @_('ID ASSIGN expr')
     def expr(self, p):
-        variables[p.ID] = p.expr
+        return Assign_node(p.ID,p.expr)
     
     @_('ID')
     def factor(self, p):
-        return variables[p.ID]
+        return Id_node(p.ID)
 
+    @_('IF expr LBRACE expr RBRACE')
+    def expr(self, p):
+        return If_node(p.expr0,p.expr1,None)
+    
+    @_('IF expr LBRACE expr RBRACE ELSE LBRACE expr RBRACE')
+    def expr(self, p):
+        return If_node(p.expr0,p.expr1,p.expr2)
+                    
     @_('ID LPAREN expr RPAREN')
     def expr(self, p):
-        functions[p.ID](p.expr)
-
-    
+        return Call_node(p.ID,p.expr)
 
 

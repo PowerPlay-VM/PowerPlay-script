@@ -1,8 +1,8 @@
 from sly import Lexer
 
 class POWERPLAY_lexer(Lexer):
-    tokens = { NUMBER, ID, WHILE, IF, ELSE, FOR, PRINT,
-               PLUS, MINUS, TIMES, DIVIDE, ASSIGN, LPAREN, RPAREN,
+    tokens = { NUMBER, STRING, ID, WHILE, IF, ELSE, FOR, PRINT,
+               PLUS, MINUS, TIMES, DIVIDE, ASSIGN, LPAREN, RPAREN, LBRACE, RBRACE,
                EQ, LT, LE, GT, GE, NE }
 
 
@@ -16,6 +16,8 @@ class POWERPLAY_lexer(Lexer):
     DIVIDE  = r'/'
     LPAREN  = r'\('
     RPAREN  = r'\)'
+    LBRACE  = r'\{'
+    RBRACE  = r'\}'
     EQ      = r'=='
     ASSIGN  = r'='
     LE      = r'<='
@@ -24,9 +26,19 @@ class POWERPLAY_lexer(Lexer):
     GT      = r'>'
     NE      = r'!='
 
-    @_(r'\d+')
+    @_(r'\d+(?:\.\d+)?')
     def NUMBER(self, t):
-        t.value = int(t.value)
+        t.value = float(t.value)
+
+        if (t.value).is_integer():
+            t.value = int(t.value)
+
+        return t
+    
+    @_(r'\".*\"')
+    def STRING(self, t):
+        t.value = str(t.value).strip('\"')
+
         return t
 
     # Identifiers and keywords
