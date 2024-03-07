@@ -3,6 +3,12 @@
 
 ### Syntax
 ```
+a = 2
 
-
+if a == 3 {
+    print("Equal")
+}
+else {
+    print("Not equal")
+}
 ```
